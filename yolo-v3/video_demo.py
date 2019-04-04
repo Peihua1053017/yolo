@@ -47,13 +47,9 @@ def write(x, img):
         cv2.rectangle(img, c1, c2,color, -1)
         cv2.putText(img, label, (c1[0], c1[1] + t_size[1] + 4), cv2.FONT_HERSHEY_PLAIN, 1, [225,255,255], 1);
     return img
-def count(x,img,amount):
+def object_li(x):
     cls = int (x[-1])
-    if str(cls)=='14':
-        amount += 1
-        print(str(amount))
-        cv2.putText(img, str(cls), (30,50), cv2.FONT_HERSHEY_PLAIN, 2, [255,255,255], 3)
-    return img
+    return cls
 def arg_parse():
     
     parser = argparse.ArgumentParser(description='YOLO v3 Video Detection Module')
@@ -81,6 +77,8 @@ if __name__ == '__main__':
     confidence = float(args.confidence)
     nms_thesh = float(args.nms_thresh)
     start = 0
+    ch_num = 0
+    temp = 0
 
     CUDA = torch.cuda.is_available()
 
@@ -162,10 +160,14 @@ if __name__ == '__main__':
             classes = load_classes('data/coco.names')
             colors = pkl.load(open("pallete", "rb"))
             
+            ch_li = list(map(lambda x: object_li(x),output))
+            ch_num = ch_li.count(14)
+            if temp < ch_num :
+                temp = ch_num    
             
             list(map(lambda x: write(x, orig_im), output))
             
-            
+            cv2.putText(orig_im, str(temp), (30,50), cv2.FONT_HERSHEY_PLAIN, 3, [255,255,255], 5)
             out.write(frame)
             key = cv2.waitKey(1)
             if key & 0xFF == ord('q'):
